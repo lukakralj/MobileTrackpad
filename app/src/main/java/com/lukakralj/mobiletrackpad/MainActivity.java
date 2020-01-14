@@ -36,8 +36,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        int x = (int)event.getX();
-        int y = (int)event.getY();
+        int x = (int) event.getX();
+        int y = (int) event.getY();
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -56,9 +56,12 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    private void mouseMoved(float deltaX, float deltaY) {
+    private void mouseMoved(int deltaX, int deltaY) {
         text.setText(deltaX + " x " + deltaY);
 
+        if ((deltaX == 0) && deltaY == 0) {
+            return;
+        }
         JSONObject extraData = new JSONObject();
         try {
             extraData.put("dx", deltaX);
@@ -70,31 +73,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         ServerConnection.getInstance().scheduleRequest(RequestCode.MOUSE_DELTA, extraData, data -> {});
-        System.out.println(ServerConnection.getInstance().isConnected() + "-> " + ServerConnection.getInstance().getCurrentUrl());
-
-        // Instantiate the RequestQueue.
-        /*RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="http://10.171.17.77:3333/mousedelta/" + deltaX + "/" + deltaY + "";
-
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                null, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.println("That didn't work!");
-                System.out.println(error);
-            }
-        });
-
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);*/
     }
 
     private class Position {
-        private float x;
-        private float y;
+        private int x;
+        private int y;
 
-        private Position(float x, float y) {
+        private Position(int x, int y) {
             this.x = x;
             this.y = y;
         }
