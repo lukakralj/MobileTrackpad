@@ -7,5 +7,6 @@ package com.lukakralj.mobiletrackpad.backend;
  *  @version 1.0
  */
 public enum RequestCode {
-        MOUSE_DELTA
+        MOUSE_DELTA,
+        MOUSE_CLICK
 }

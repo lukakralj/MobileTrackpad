@@ -11,7 +11,9 @@ import org.json.JSONObject;
 import static com.lukakralj.mobiletrackpad.backend.RequestCode.*;
 
 public class ServerConnection extends Thread {
-    private static String url = "http://10.171.17.77:3333"; // Server URL.
+    private static String name = "Ubuntu - Ethernet";
+    private static String ip = "10.171.17.77"; // Server IP.
+    private static String port = "3333"; // Server port.
     private static ServerConnection instance;
 
     /** Queue of all the request that need to be send to the server. */
@@ -27,6 +29,7 @@ public class ServerConnection extends Thread {
 
     private ServerConnection() {
         try {
+            String url = "http://" + ip + ":" + port;
             System.out.println("Connecting to: " + url);
 
             io = IO.socket(url);
@@ -69,10 +72,11 @@ public class ServerConnection extends Thread {
     /**
      * Reconnect to the server using a new URL. Previously scheduled events will be preserved.
      *
-     * @param newUrl New url of the server.
+     * @param newIp New ip of the server.
+     * @param newPort New port of the server.
      */
-    public static void reconnect(String newUrl) {
-        System.out.println("Reconnecting with: " + newUrl);
+    public static void reconnect(String newName, String newIp, String newPort) {
+        //System.out.println("Reconnecting with: " + newIp + ":" + newPort);
         if (instance != null) {
             instance.stopThread();
             try {
@@ -85,7 +89,9 @@ public class ServerConnection extends Thread {
             instance.io.close();
             instance = null;
         }
-        url = newUrl;
+        name = newName;
+        ip = newIp;
+        port = newPort;
         getInstance();
     }
 
@@ -97,7 +103,7 @@ public class ServerConnection extends Thread {
 
         while (!stop) {
             if (events.size() > 0) { // check if there are any new events
-                System.out.println("Processing event: " + events.get(0).requestCode);
+                //System.out.println("Processing event: " + events.get(0).requestCode);
                 processEvent(events.remove(0));
             }
             try {
@@ -140,11 +146,28 @@ public class ServerConnection extends Thread {
 
     /**
      *
-     * @return URL that the app is currently connected to.
+     * @return IP that the app is currently connected to.
      */
-    public String getCurrentUrl() {
-        return url;
+    public String getIp() {
+        return ip;
     }
+
+    /**
+     *
+     * @return Port that the app is currently connected to.
+     */
+    public String getPort() {
+        return port;
+    }
+
+    /**
+     *
+     * @return Current connection name.
+     */
+    public String getConnectionName() {
+        return name;
+    }
+
 
     /**
      * Schedule new request to be sent to the server. Requests are processed in
@@ -210,6 +233,7 @@ public class ServerConnection extends Thread {
     private String getCodeString(RequestCode code) {
         switch (code) {
             case MOUSE_DELTA: return "mouse_delta";
+            case MOUSE_CLICK: return "mouse_click";
             default: throw new RuntimeException("Invalid server code: " + code);
         }
     }

@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">MobileTrackpad</string>
+    <string name="moveAround">Use as any other trackpad.</string>
+    <string name="waitConnection">Connecting...</string>
+    <string name="configure">Configure URL</string>
+    <string name="connectionName">Connection name</string>
+    <string name="serverIp">Server IP</string>
+    <string name="serverPort">Server port</string>
+    <string name="save">Save</string>
+    <string name="history">History</string>
+    <string name="delete">Delete</string>
+    <string name="noHistory">No history</string>
 </resources>
