@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.TextView;
 import com.lukakralj.mobiletrackpad.backend.RequestCode;
 import com.lukakralj.mobiletrackpad.backend.ServerConnection;
@@ -23,11 +24,15 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity {
 
     private static int clickDistanceThreshold = 5;
+    private static long longPressThreshold = 300; // ms
 
     private TextView text;
     private Position movedStartPos;
     private Position prevPos;
-    private boolean mouseMoved;
+    private boolean mouseMoving;
+    private boolean mouseDragged;
+    private boolean isLeftDown;
+    private long startMillis;
     private Handler handler; // UI handler
 
 
@@ -39,7 +44,10 @@ public class MainActivity extends AppCompatActivity {
         text = (TextView) findViewById(R.id.text);
         prevPos =  null;
         movedStartPos = null;
-        mouseMoved = false;
+        mouseMoving = false;
+        mouseDragged = false;
+        isLeftDown = false;
+        startMillis = 0;
         handler = new Handler(Looper.getMainLooper());
 
         text.setText(R.string.waitConnection);
@@ -89,31 +97,54 @@ public class MainActivity extends AppCompatActivity {
             case MotionEvent.ACTION_DOWN:
                 movedStartPos = new Position(x, y);
                 prevPos = new Position(x, y);
-                mouseMoved = false;
+                mouseMoving = false;
+                startMillis = System.currentTimeMillis();
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (Math.abs(x - movedStartPos.x) > clickDistanceThreshold ||
-                        Math.abs(y - movedStartPos.y) > clickDistanceThreshold) {
-                    mouseMoved = true;
-                    mouseMoved(x - prevPos.x, y - prevPos.y);
+                if (Math.abs(x - movedStartPos.x) < clickDistanceThreshold &&
+                        Math.abs(y - movedStartPos.y) < clickDistanceThreshold &&
+                        System.currentTimeMillis() - startMillis >= longPressThreshold) {
+                    leftDown();
+                    mouseDragged = true;
+                    isLeftDown = true;
+                }
+
+                if (Math.abs(x - movedStartPos.x) >= clickDistanceThreshold ||
+                        Math.abs(y - movedStartPos.y) >= clickDistanceThreshold) {
+                    mouseMoving = true;
+                    mouseDelta(x - prevPos.x, y - prevPos.y);
                     prevPos.x = x;
                     prevPos.y = y;
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (!mouseMoved
+                if (!mouseMoving && !mouseDragged
                         && Math.abs(x - movedStartPos.x) < clickDistanceThreshold
                         && Math.abs(y - movedStartPos.y) < clickDistanceThreshold) {
-                    mouseClick();
+                    leftClick();
                 }
-                movedStartPos = null;
-                prevPos = null;
+                resetMouse();
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                resetMouse();
+                break;
         }
 
         return false;
     }
 
-    private void mouseMoved(int deltaX, int deltaY) {
+    private void resetMouse() {
+        mouseMoving = false;
+        movedStartPos = null;
+        prevPos = null;
+        startMillis = 0;
+        mouseDragged = false;
+        if (isLeftDown) {
+            leftUp();
+        }
+    }
+
+    private void mouseDelta(int deltaX, int deltaY) {
         if ((deltaX == 0) && deltaY == 0) {
             return;
         }
@@ -130,8 +161,29 @@ public class MainActivity extends AppCompatActivity {
         ServerConnection.getInstance().scheduleRequest(RequestCode.MOUSE_DELTA, extraData, data -> {});
     }
 
-    private void mouseClick() {
-        ServerConnection.getInstance().scheduleRequest(RequestCode.MOUSE_CLICK, data -> {});
+    private void leftClick() {
+        ServerConnection.getInstance().scheduleRequest(RequestCode.LEFT_CLICK, data -> {});
+    }
+
+    private void rightClick() {
+        ServerConnection.getInstance().scheduleRequest(RequestCode.RIGHT_CLICK, data -> {});
+    }
+
+    private void leftDown() {
+        ServerConnection.getInstance().scheduleRequest(RequestCode.LEFT_DOWN, data -> {});
+    }
+
+    private void leftUp() {
+        ServerConnection.getInstance().scheduleRequest(RequestCode.LEFT_UP, data -> {
+        });
+    }
+
+    private void scrollUp() {
+        ServerConnection.getInstance().scheduleRequest(RequestCode.SCROLL_UP, data -> {});
+    }
+
+    private void scrollDown() {
+        ServerConnection.getInstance().scheduleRequest(RequestCode.SCROLL_DOWN, data -> {});
     }
 
     private class Position {

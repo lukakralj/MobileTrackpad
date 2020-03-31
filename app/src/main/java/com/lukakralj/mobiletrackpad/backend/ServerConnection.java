@@ -168,7 +168,6 @@ public class ServerConnection extends Thread {
         return name;
     }
 
-
     /**
      * Schedule new request to be sent to the server. Requests are processed in
      * first-come-first-server manner.
@@ -232,8 +231,13 @@ public class ServerConnection extends Thread {
      */
     private String getCodeString(RequestCode code) {
         switch (code) {
-            case MOUSE_DELTA: return "mouse_delta";
-            case MOUSE_CLICK: return "mouse_click";
+            case MOUSE_DELTA: return "mouseDelta";
+            case LEFT_CLICK: return "leftClick";
+            case RIGHT_CLICK: return "rightClick";
+            case LEFT_DOWN: return "leftDown";
+            case LEFT_UP: return "leftUp";
+            case SCROLL_UP: return "scrollUp";
+            case SCROLL_DOWN: return "scrollDown";
             default: throw new RuntimeException("Invalid server code: " + code);
         }
     }

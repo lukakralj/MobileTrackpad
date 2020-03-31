@@ -8,5 +8,10 @@ package com.lukakralj.mobiletrackpad.backend;
  */
 public enum RequestCode {
         MOUSE_DELTA,
-        MOUSE_CLICK
+        LEFT_CLICK,
+        RIGHT_CLICK,
+        LEFT_DOWN,
+        LEFT_UP,
+        SCROLL_UP,
+        SCROLL_DOWN
 }
